@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
     char* aux = (char*) malloc (sizeof(filepath) + sizeof(filename));
     sprintf(aux, "%s%s", filepath, filename);
     
-    FILE* original_file = fopen(aux, "r");
-    
+    FILE* original_file = fopen(aux, "rb");
+    free(aux);
 
     // ----------------------------------------------------------
     // ----------------------------------------------------------
@@ -62,7 +62,6 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
     fclose(original_file);
-    free(aux);
 
     return 0;
 }
