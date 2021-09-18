@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
 
-    FILE* output_file = fopen(original_name, "w");
+    FILE* output_file = fopen(original_name, "wb");
 
     join_chunks(folderpath, output_file, chunks, chunk_size);
 
@@ -83,8 +83,6 @@ void join_chunks(char* folderpath, FILE* output, int chunks, long unsigned int c
     char* buffer = (char *) malloc(chunk_size + 1);
     
     for (i = 0; i < chunks; i++){
-        printf("\ni -> %d\n", i);
-
         sprintf(aux, "%s/c_%d.fc", folderpath, i);
 
         FILE* chunk_file = fopen(aux, "rb");
@@ -93,15 +91,10 @@ void join_chunks(char* folderpath, FILE* output, int chunks, long unsigned int c
         len = ftell(chunk_file);
         fseek(chunk_file, 0, SEEK_SET);
 
-        printf("len:\t%d\n", len);
-
-        int t = fread(buffer, chunk_size, 1, chunk_file);
-
-        // printf("buffer:\t%s\n", buffer);
-        printf("t:\t%x", t);
-
-        fwrite(buffer, 1, chunk_size, output);
+        fread(buffer, len, 1, chunk_file);
+        fwrite(buffer, 1, len, output);
 
         fclose(chunk_file);
     }
+    free(buffer);
 }
