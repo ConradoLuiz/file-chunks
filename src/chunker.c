@@ -109,7 +109,7 @@ void create_log(char* output_folder, int chunks, char* original_name){
     fwrite("\n", 1, 1, file);
 
     sprintf(aux, "%d", chunks);
-    fwrite(aux, 1, 1, file);
+    fwrite(aux, 1, strlen(aux), file);
 
     fclose(file);
 }
