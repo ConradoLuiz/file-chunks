@@ -3,7 +3,7 @@
 #include <string.h>
 
 int     get_log_info    (char* folderpath, char* original_name);
-void    join_chunks     (char* folderpath, FILE* output, int chunks);
+void    join_chunks     (char* folderpath, FILE* output, int chunks, long unsigned int chunk_size);
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("Main original:\t%s", original_name);
-    printf("\nChunks:\t\t%d\n", chunks);
+    printf("Main original:\t%s\n", original_name);
+    printf("Chunks:\t\t%d\n", chunks);
 
     // ----------------------------------------------------------
     // ----------------------------------------------------------
@@ -37,7 +37,9 @@ int main(int argc, char *argv[]) {
 
     FILE* output_file = fopen(original_name, "w");
 
-    join_chunks(folderpath, output_file, chunks);
+    join_chunks(folderpath, output_file, chunks, chunk_size);
+
+    fclose(output_file);
     return 0;
 }
 
@@ -74,6 +76,32 @@ int get_log_info(char* folderpath, char* original_name){
     return atoi(buffer);
 }
 
-void join_chunks(char* folderpath, FILE* output, int chunks){
+void join_chunks(char* folderpath, FILE* output, int chunks, long unsigned int chunk_size){
+    int i;
+    char aux[10000];
+    long unsigned int len;
+    char* buffer = (char *) malloc(chunk_size + 1);
+    
+    for (i = 0; i < chunks; i++){
+        printf("\ni -> %d\n", i);
 
+        sprintf(aux, "%s/c_%d.fc", folderpath, i);
+
+        FILE* chunk_file = fopen(aux, "rb");
+
+        fseek(chunk_file, 0, SEEK_END);
+        len = ftell(chunk_file);
+        fseek(chunk_file, 0, SEEK_SET);
+
+        printf("len:\t%d\n", len);
+
+        int t = fread(buffer, chunk_size, 1, chunk_file);
+
+        // printf("buffer:\t%s\n", buffer);
+        printf("t:\t%x", t);
+
+        fwrite(buffer, 1, chunk_size, output);
+
+        fclose(chunk_file);
+    }
 }

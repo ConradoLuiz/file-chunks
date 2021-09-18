@@ -3,7 +3,7 @@
 #include <string.h>
 
 char*   create_output_folder    (int argc, char *argv[]);
-int     create_chunks           (FILE* file, char* output_folder, long unsigned int chunk_size);
+int     create_chunks           (FILE* file, char* output_folder, long unsigned int chunk_size, long unsigned int filesize);
 void    create_log              (char* output_folder, int chunks, char* original_name);
 
 int main(int argc, char *argv[]) {
@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
     // ----------------------------------------------------------
-    long unsigned int chunk_size = 25 * 1024 * 1024;
+    long unsigned int chunk_size = 24 * 1024 * 1024;
     char *filepath = argv[1];
     char *filename = argv[2];
     
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     // ----------------------------------------------------------
     // ----------------------------------------------------------
 
-    int chunks = create_chunks(original_file, output_folder, chunk_size);
+    int chunks = create_chunks(original_file, output_folder, chunk_size, len);
 
     create_log(output_folder, chunks, filename);
 
@@ -66,21 +66,35 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-int create_chunks(FILE* file, char* output_folder, long unsigned int chunk_size){
+int create_chunks(FILE* file, char* output_folder, long unsigned int chunk_size, long unsigned int filesize){
     int chunk_id = 0;
     char chunk_name[10000];
     char* buffer = (char *) malloc(chunk_size + 1);
+    size_t can_read = 1;
+    long unsigned int _ftell;
 
     while(fread(buffer, chunk_size, 1, file)) {
+
         sprintf(chunk_name, "%s/c_%d.fc", output_folder, chunk_id);
         chunk_id++;
 
-        FILE* chunk_file = fopen(chunk_name, "w");
+        FILE* chunk_file = fopen(chunk_name, "wb");
 
         fwrite(buffer, 1, chunk_size, chunk_file);
 
         fclose(chunk_file);
+
+        _ftell = ftell(file);
     }   
+
+    sprintf(chunk_name, "%s/c_%d.fc", output_folder, chunk_id);
+    chunk_id++;
+    FILE* chunk_file = fopen(chunk_name, "wb");
+
+    fwrite(buffer, 1, filesize - _ftell, chunk_file);
+
+    fclose(chunk_file);
+
     free(buffer);
 
     return chunk_id;
